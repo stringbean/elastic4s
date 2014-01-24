@@ -1,0 +1,14 @@
+{
+  "user": "sammy",
+  "post_date": "2011-11-15T14:12:12",
+  "message": [
+    {
+      "id": 1,
+      "body": "first message"
+    },
+    {
+      "id": 2,
+      "body": "second message"
+    }
+  ]
+}

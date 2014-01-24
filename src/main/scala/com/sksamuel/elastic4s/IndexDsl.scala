@@ -7,6 +7,7 @@ import org.elasticsearch.action.index.{IndexAction, IndexRequest}
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConverters._
 import com.sksamuel.elastic4s.source.{DocumentMap, DocumentSource, Source}
+import java.{util => ju}
 
 /** @author Stephen Samuel */
 trait IndexDsl {
@@ -37,11 +38,10 @@ trait IndexDsl {
     }
 
     def _fieldsAsXContent: XContentBuilder = {
-      val source = XContentFactory.jsonBuilder().startObject()
-      for ( tuple <- _fields ) {
-        source.field(tuple._1, tuple._2)
-      }
-      source.endObject()
+      val source = XContentFactory.jsonBuilder()
+
+      val converted = prepareFields(_fields.toMap)
+      source.map(converted)
     }
 
     def id(id: Any): IndexDefinition = {
@@ -103,5 +103,24 @@ trait IndexDsl {
 
     @deprecated("renamed to doc", "1.0")
     def source(source: Source) = doc(source)
+
+    private def prepareFields(fields: Map[String, Any]): ju.Map[String, AnyRef] = {
+      fields.map {
+        case (k: String, v: Array[Map[_, _]]) =>
+          (k, v.map(_.asJava))
+        case (k: String, v: Array[Array[(_, _)]]) =>
+          (k, v.map(_.toMap.asJava))
+        case (k: String, v: Array[Seq[(_, _)]]) =>
+          (k, v.map(ve => prepareFields(ve.toMap.asInstanceOf[Map[String, Any]])))
+        case (k: String, v: Map[_, _]) =>
+          (k, prepareFields(v.asInstanceOf[Map[String, Any]]))
+        case (k: String, v: Array[_]) =>
+          (k, v)
+        case (k: String, null) =>
+          (k, null)
+        case (k: String, v: Any) =>
+          (k, v)
+      }.asJava.asInstanceOf[ju.Map[String, AnyRef]]
+    }
   }
 }

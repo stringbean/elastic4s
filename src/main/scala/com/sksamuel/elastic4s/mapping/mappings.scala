@@ -26,6 +26,7 @@ class MappingDefinition(val `type`: String) {
   var _boostValue: Double = 0
   var _dynamic: DynamicMapping = Dynamic
   var _meta: Map[String, Any] = Map.empty
+  var _storeAll = false
 
   def analyzer(analyzer: String): MappingDefinition = {
     _analyzer = Option(analyzer)
@@ -67,6 +68,12 @@ class MappingDefinition(val `type`: String) {
     this.numeric_detection = numeric_detection
     this
   }
+
+  def storeAll(storeAll: Boolean): MappingDefinition = {
+    _storeAll = storeAll
+    this
+  }
+
   def as(iterable: Iterable[TypedFieldDefinition]): MappingDefinition = {
     _fields ++= iterable
     this
@@ -111,6 +118,13 @@ class MappingDefinition(val `type`: String) {
       for ( meta <- _meta ) {
         source.field(meta._1, meta._2)
       }
+      source.endObject()
+    }
+
+    if (_storeAll) {
+      source.startObject("_all")
+      source.field("enabled", true)
+      source.field("store", true)
       source.endObject()
     }
 

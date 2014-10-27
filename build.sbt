@@ -5,7 +5,7 @@ name := "elastic4s"
 
 organization := "com.sksamuel.elastic4s"
 
-version := "1.3.2"
+version := "1.3.2-z3"
 
 scalaVersion := "2.11.2"
 
@@ -16,15 +16,6 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 publishMavenStyle := true
 
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
-
-publishTo <<= version {
-  (v: String) =>
-    val nexus = "https://oss.sonatype.org/"
-    if (v.trim.endsWith("SNAPSHOT"))
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
 
 publishArtifact in Test := false
 
@@ -59,29 +50,16 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(MultilineScaladocCommentsStartOnFirstLine, true)
   .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, true)
 
-pomExtra := {
-  <url>https://github.com/sksamuel/elastic4s</url>
-    <licenses>
-      <license>
-        <name>Apache 2</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
-    <scm>
-      <url>git@github.com:sksamuel/elastic4s.git</url>
-      <connection>scm:git@github.com:sksamuel/elastic4s.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>sksamuel</id>
-        <name>sksamuel</name>
-        <url>http://github.com/sksamuel</url>
-      </developer>
-      <developer>
-        <id>fehmicansaglam</id>
-        <name>fehmicansaglam</name>
-        <url>http://github.com/fehmicansaglam</url>
-      </developer>
-    </developers>
+publishTo <<= (version) { version: String =>
+      val zestia = "https://zestia.artifactoryonline.com/zestia/"
+            if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at zestia + "libs-snapshots-local/")
+                        else                                   Some("releases"  at zestia + "libs-releases-local/")
 }
+
+// if publish fails (e.g. the artifact has already been uploaded) then throw success for jenkins anyway
+publish <<= publish mapR {
+  case Inc(inc: Incomplete) => 3
+  case Value(v) => v
+}
+
+credentials += Credentials(Path.userHome / ".artifactory-credentials")

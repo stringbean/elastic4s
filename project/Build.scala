@@ -4,7 +4,7 @@ import sbt.Keys._
 object Build extends Build {
 
   val org = "com.sksamuel.elastic4s"
-  val appVersion = "1.7.5"
+  val appVersion = "1.7.5-z1"
 
   val ScalaVersion = "2.11.7"
   val ScalatestVersion = "2.2.5"
@@ -39,14 +39,12 @@ object Build extends Build {
       "org.codehaus.groovy" % "groovy" % GroovyVersion % "test",
       "com.vividsolutions" % "jts" % "1.13" % "test"
     ),
-    publishTo <<= version {
-      (v: String) =>
-        val nexus = "https://oss.sonatype.org/"
-        if (v.trim.endsWith("SNAPSHOT"))
-          Some("snapshots" at nexus + "content/repositories/snapshots")
-        else
-          Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    publishTo <<= version { version: String =>
+      val zestia = "https://zestia.jfrog.io/zestia/"
+      if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at zestia + "libs-snapshots-local/")
+      else                                   Some("releases"  at zestia + "libs-releases-local/")
     },
+    credentials += Credentials(Path.userHome / ".jfrog-credentials"),
     pomExtra := {
       <url>https://github.com/sksamuel/elastic4s</url>
         <licenses>

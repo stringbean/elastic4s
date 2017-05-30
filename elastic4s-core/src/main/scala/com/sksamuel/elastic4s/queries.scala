@@ -1302,6 +1302,17 @@ class QueryInnerHitsDefinition(private[elastic4s] val name: String) {
     builder.setSize(s)
     this
   }
+
+  def highlighting(options: HighlightOptionsDefinition, highlights: HighlightDefinition*): this.type = {
+    options._encoder.foreach(encoder => builder.setHighlighterEncoder(encoder.elastic))
+    options._tagSchema.foreach(arg => builder.setHighlighterTagsSchema(arg.elastic))
+    options._order.foreach(arg => builder.setHighlighterOrder(arg.elastic))
+    builder.setHighlighterPostTags(options._postTags: _*)
+    builder.setHighlighterPreTags(options._preTags: _*)
+    builder.setHighlighterRequireFieldMatch(options._requireFieldMatch)
+    highlights.foreach(highlight => builder.addHighlightedField(highlight.builder))
+    this
+  }
 }
 
 class InnerHitDefinition(private[elastic4s] val name: String) {

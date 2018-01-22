@@ -3,10 +3,10 @@ import sbt.Keys._
 
 object Build extends Build {
 
-  val org = "com.sksamuel.elastic4s"
+  val org = "com.sksamuel.elastic4s.legacy"
   val appVersion = "1.7.5-z1"
 
-  val ScalaVersion = "2.11.7"
+  val ScalaVersion = "2.11.12"
   val ScalatestVersion = "2.2.5"
   val MockitoVersion = "1.9.5"
   val JacksonVersion = "2.6.0"
@@ -41,8 +41,8 @@ object Build extends Build {
     ),
     publishTo <<= version { version: String =>
       val zestia = "https://zestia.jfrog.io/zestia/"
-      if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at zestia + "libs-snapshots-local/")
-      else                                   Some("releases"  at zestia + "libs-releases-local/")
+      if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at zestia + "ext-snapshots-local/")
+      else                                   Some("releases"  at zestia + "ext-releases-local/")
     },
     credentials += Credentials(Path.userHome / ".jfrog-credentials"),
     pomExtra := {
